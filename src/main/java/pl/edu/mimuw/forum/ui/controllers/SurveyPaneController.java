@@ -11,6 +11,14 @@ public class SurveyPaneController extends BasePaneController {
 
 	private SurveyViewModel model;
 
+	public Button getUpVoteButton() {
+		return upVoteButton;
+	}
+
+	public Button getDownVoteButton() {
+		return downVoteButton;
+	}
+
 	@FXML
 	private Button upVoteButton;
 

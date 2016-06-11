@@ -1,15 +1,11 @@
 package pl.edu.mimuw.forum.ui.controllers;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import pl.edu.mimuw.forum.ui.models.CommentViewModel;
-import pl.edu.mimuw.forum.ui.models.NodeViewModel;
-import pl.edu.mimuw.forum.ui.models.SuggestionViewModel;
-import pl.edu.mimuw.forum.ui.models.SurveyViewModel;
-import pl.edu.mimuw.forum.ui.models.TaskViewModel;
+import pl.edu.mimuw.forum.ui.models.*;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Kontroler widoku do edycji wezlow forum.
@@ -29,13 +25,25 @@ public class DetailsPaneController implements Initializable {
 
 	@FXML
 	private ContentPaneController contentController;
-	
+
+	public SuggestionPaneController getSuggestionController() {
+		return suggestionController;
+	}
+
 	@FXML
 	private SuggestionPaneController suggestionController;
 	
 	@FXML
 	private TaskPaneController taskController;
-	
+
+	public SurveyPaneController getSurveyController() {
+		return surveyController;
+	}
+
+	public TaskPaneController getTaskController() {
+		return taskController;
+	}
+
 	@FXML
 	private SurveyPaneController surveyController;
 

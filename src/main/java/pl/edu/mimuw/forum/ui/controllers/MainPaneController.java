@@ -1,29 +1,28 @@
    package pl.edu.mimuw.forum.ui.controllers;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+   import com.thoughtworks.xstream.XStream;
+   import javafx.beans.binding.Bindings;
+   import javafx.beans.binding.BooleanBinding;
+   import javafx.fxml.FXML;
+   import javafx.fxml.FXMLLoader;
+   import javafx.fxml.Initializable;
+   import javafx.scene.Node;
+   import javafx.scene.control.TreeItem;
+   import javafx.scene.control.TreeView;
+   import pl.edu.mimuw.forum.exceptions.ApplicationException;
+   import pl.edu.mimuw.forum.modifications.*;
+   import pl.edu.mimuw.forum.ui.bindings.MainPaneBindings;
+   import pl.edu.mimuw.forum.ui.helpers.DialogHelper;
+   import pl.edu.mimuw.forum.ui.models.*;
+   import pl.edu.mimuw.forum.ui.tree.ForumTreeItem;
+   import pl.edu.mimuw.forum.ui.tree.TreeLabel;
 
-import com.thoughtworks.xstream.XStream;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import pl.edu.mimuw.forum.exceptions.ApplicationException;
-import pl.edu.mimuw.forum.modifications.*;
-import pl.edu.mimuw.forum.ui.bindings.MainPaneBindings;
-import pl.edu.mimuw.forum.ui.helpers.DialogHelper;
-import pl.edu.mimuw.forum.ui.models.CommentViewModel;
-import pl.edu.mimuw.forum.ui.models.NodeViewModel;
-import pl.edu.mimuw.forum.ui.tree.ForumTreeItem;
-import pl.edu.mimuw.forum.ui.tree.TreeLabel;
+   import java.io.*;
+   import java.net.URL;
+   import java.util.ArrayList;
+   import java.util.List;
+   import java.util.Optional;
+   import java.util.ResourceBundle;
 
 /**
  * Kontroler glownego widoku reprezentujacego forum.
@@ -232,7 +231,6 @@ public class MainPaneController implements Initializable {
 			if(wasUndo)
 				return;
 			addModification(new ModificationOfContent(detailsController.getContentController().commentProperty(), oldValue, newValue));
-			System.out.print("ZMIANA");
 		});
 	}
 
@@ -241,7 +239,46 @@ public class MainPaneController implements Initializable {
 			if(wasUndo)
 				return;
 			addModification(new ModificationOfAuthor(detailsController.getContentController().userProperty(), oldValue, newValue));
-			System.out.print("ZMIANA");
+		});
+	}
+
+	void addSuggestionResponseListener(SuggestionViewModel node) {
+		node.getResponse().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfSuggestionResponse(detailsController.getSuggestionController().responseProperty(), oldValue, newValue));
+		});
+	}
+
+	void addSuggestionAcceptableListener(SuggestionViewModel node) {
+		node.getIsResponseAccepted().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfSuggestionAcceptable(detailsController.getSuggestionController().acceptableProperty(), oldValue, newValue));
+		});
+	}
+
+	void addSurveyUpvotesListener(SurveyViewModel node) {
+		node.getLikes().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfUpvotes(detailsController.getSurveyController().getUpVoteButton(), oldValue.intValue(), newValue.intValue()));
+		});
+	}
+
+	void addSurveyDownvotesListener(SurveyViewModel node) {
+		node.getDislikes().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfDownvotes(detailsController.getSurveyController().getDownVoteButton(), oldValue.intValue(), newValue.intValue()));
+		});
+	}
+
+	void addTaskDateListener(TaskViewModel node) {
+		node.getDueDate().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfTaskDate(detailsController.getTaskController().getDateTimeProperty(), oldValue, newValue));
 		});
 	}
 
@@ -258,6 +295,17 @@ public class MainPaneController implements Initializable {
 			addModification(new ModificationOfNode(node));
 			addContentListener(node);
 			addAuthorListener(node);
+			if(node.getName().equals("Suggestion")) {
+				addSuggestionResponseListener((SuggestionViewModel) node);
+				addSuggestionAcceptableListener((SuggestionViewModel) node);
+			}
+			if(node.getName().equals("Survey")) {
+				addSurveyUpvotesListener((SurveyViewModel) node);
+				addSurveyDownvotesListener((SurveyViewModel) node);
+			}
+			if(node.getName().equals("Task")) {
+				addTaskDateListener((TaskViewModel) node);
+			}
 		});
 	}
 
@@ -370,8 +418,6 @@ public class MainPaneController implements Initializable {
 				if (change.wasAdded()) {
 					int i = change.getFrom();
 					for (NodeViewModel child : change.getAddedSubList()) {
-						// TODO Tutaj byc moze nalezy dodac zapisywanie jaka operacja jest wykonywana
-						// by mozna bylo ja odtworzyc przy undo/redo
 						addToTree(child, viewNode, i);	// uwzgledniamy nowy wezel modelu w widoku
 						i++;
 					}
@@ -379,8 +425,6 @@ public class MainPaneController implements Initializable {
 
 				if (change.wasRemoved()) {
 					for (int i = change.getFrom(); i <= change.getTo(); ++i) {
-						// TODO Tutaj byc moze nalezy dodac zapisywanie jaka operacja jest wykonywana
-						// by mozna bylo ja odtworzyc przy undo/redo
 						removeFromTree((ForumTreeItem) viewNode.getChildren().get(i)); // usuwamy wezel modelu z widoku
 					}
 				}

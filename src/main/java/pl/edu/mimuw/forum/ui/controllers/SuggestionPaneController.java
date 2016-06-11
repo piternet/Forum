@@ -1,5 +1,8 @@
 package pl.edu.mimuw.forum.ui.controllers;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import jfxtras.styles.jmetro8.ToggleSwitch;
@@ -31,4 +34,11 @@ public class SuggestionPaneController extends BasePaneController {
 		setHasModel(model != null);
 	}
 
+	public StringProperty responseProperty() {
+		return suggestionField.textProperty();
+	}
+
+	public BooleanProperty acceptableProperty() {
+		return acceptableField.selectedProperty();
+	}
 }
