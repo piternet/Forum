@@ -1,4 +1,4 @@
-package pl.edu.mimuw.forum.ui.controllers;
+   package pl.edu.mimuw.forum.ui.controllers;
 
 import java.io.*;
 import java.net.URL;
@@ -16,11 +16,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import pl.edu.mimuw.forum.example.Dummy;
 import pl.edu.mimuw.forum.exceptions.ApplicationException;
-import pl.edu.mimuw.forum.modifications.Modification;
-import pl.edu.mimuw.forum.modifications.ModificationOfNode;
-import pl.edu.mimuw.forum.modifications.ModificationOfRedo;
+import pl.edu.mimuw.forum.modifications.*;
 import pl.edu.mimuw.forum.ui.bindings.MainPaneBindings;
 import pl.edu.mimuw.forum.ui.helpers.DialogHelper;
 import pl.edu.mimuw.forum.ui.models.CommentViewModel;
@@ -64,6 +61,8 @@ public class MainPaneController implements Initializable {
 	@FXML
 	private DetailsPaneController detailsController;
 
+	private boolean wasUndo = false;
+
 	public MainPaneController() {
 		bindings = new MainPaneBindings();
 	}
@@ -102,6 +101,10 @@ public class MainPaneController implements Initializable {
 														// otwarty jest plik - '*' oznacza niezapisane zmiany
 		bindings.undoAvailableProperty().set(false);
 		bindings.redoAvailableProperty().set(false);		// Podobnie z undo i redo
+
+
+
+
 	}
 
 	public MainPaneBindings getPaneBindings() {
@@ -133,7 +136,10 @@ public class MainPaneController implements Initializable {
 
 			document = node.getModel();
 		} else {
-			document = new CommentViewModel("Welcome to a new forum", "Admin");
+			NodeViewModel node = new CommentViewModel("Welcome to a new forum", "Admin");
+			addContentListener(node);
+			addAuthorListener(node);
+			document = node;
 		}
 
 		/** Dzieki temu kontroler aplikacji bedzie mogl wyswietlic nazwe pliku jako tytul zakladki.
@@ -177,25 +183,23 @@ public class MainPaneController implements Initializable {
 	 * @throws ApplicationException
 	 */
 	public void undo() throws ApplicationException {
-		System.out.println("On undo");	//TODO Tutaj umiescic obsluge undo
-		if(modifications.isEmpty()) {
-			noModifications();
-			return;
-		}
-		int last = modifications.size()-1;
-		Modification lastModification = modifications.get(last);
-		lastModification.undo();
-		modifications.remove(last);
-		undos.add(lastModification);
-		setRedo(true);
-		System.out.println(modifications.size());
+		System.out.println("On undo");
 		if(modifications.isEmpty()) {
 			setUndo(false);
-			modifications.add(lastModification);
 			return;
 		}
-		else
-			System.out.println(modifications.get(0));
+		wasUndo = true;
+		int last = modifications.size() - 1;
+		Modification lastElement = modifications.get(last);
+		modifications.remove(last);
+
+		lastElement.undo();
+		undos.add(lastElement);
+		setRedo(true);
+
+		if(modifications.isEmpty())
+			setUndo(false);
+		wasUndo = false;
 	}
 
 	/**
@@ -203,21 +207,42 @@ public class MainPaneController implements Initializable {
 	 * @throws ApplicationException
 	 */
 	public void redo() throws ApplicationException {
-		System.out.println("On redo");	//TODO Tutaj umiescic obsluge redo
+		System.out.println("On redo");
+
 		if(undos.isEmpty()) {
 			setRedo(false);
 			return;
 		}
-		int last = undos.size()-1;
-		Modification lastModification = undos.get(last);
-		lastModification.redo();
-		// modifications.remove(modifications.size()-1);
-		addModification(new ModificationOfRedo(lastModification));
+
+		int last = undos.size() - 1;
+		Modification lastElement = undos.get(last);
 		undos.remove(last);
-		if(undos.isEmpty()) {
+
+		lastElement.redo();
+		modifications.add(lastElement);
+		setUndo(true);
+
+		if(undos.isEmpty())
 			setRedo(false);
-			return;
-		}
+
+	}
+
+	void addContentListener(NodeViewModel node) {
+		node.getContent().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfContent(detailsController.getContentController().commentProperty(), oldValue, newValue));
+			System.out.print("ZMIANA");
+		});
+	}
+
+	void addAuthorListener(NodeViewModel node) {
+		node.getAuthor().addListener((observable, oldValue, newValue) -> {
+			if(wasUndo)
+				return;
+			addModification(new ModificationOfAuthor(detailsController.getContentController().userProperty(), oldValue, newValue));
+			System.out.print("ZMIANA");
+		});
 	}
 
 	/**
@@ -231,6 +256,8 @@ public class MainPaneController implements Initializable {
 															// funkcji nasluchujacej na zmiany w modelu (zob. metode createViewNode ponizej)
 			node.setParent(currentlySelected);
 			addModification(new ModificationOfNode(node));
+			addContentListener(node);
+			addAuthorListener(node);
 		});
 	}
 
@@ -244,11 +271,12 @@ public class MainPaneController implements Initializable {
 			NodeViewModel parentModel;
 			NodeViewModel currentModel = currentlySelectedItem.getValue();
 			if (parent == null) {
-				return; // Blokujemy usuniecie korzenia - TreeView bez korzenia jest niewygodne w obsludze
+				return; // Blokujemy usuniecie korzenia - TreeView bez kobrzenia jest niewygodne w obsludze
 			} else {
 				parentModel = parent.getValue();
 				parentModel.getChildren().remove(currentModel); // Zmieniamy jedynie model, widok (TreeView) jest aktualizowany z poziomu
 																// funkcji nasluchujacej na zmiany w modelu (zob. metode createViewNode ponizej)
+				addModification(new ModificationDelete(currentModel));
 			}
 
 		});
@@ -269,7 +297,6 @@ public class MainPaneController implements Initializable {
 
 		ForumTreeItem root = createViewNode(document);
 		root.addEventHandler(TreeItem.<NodeViewModel> childrenModificationEvent(), event -> {
-			//TODO Moze przydac sie do wykrywania usuwania/dodawania wezlow w drzewie (widoku)
 			if (event.wasAdded()) {
 				System.out.println("Adding to " + event.getSource());
 			}

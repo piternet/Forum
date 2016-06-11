@@ -7,6 +7,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import pl.edu.mimuw.forum.modifications.ModificationOfContent;
 import pl.edu.mimuw.forum.ui.models.NodeViewModel;
 
 public class ContentPaneController extends BasePaneController {
@@ -41,12 +42,15 @@ public class ContentPaneController extends BasePaneController {
 		
 		userProperty().addListener((observable, oldValue, newValue) -> {
 			System.out.println("Changing user name: " + oldValue + "->" + newValue);
+
 		});
 		
 		commentProperty().addListener((observable, oldValue, newValue) -> {
+
 			System.out.println("Changing comment: " + oldValue + "->" + newValue);
 		});
 	}
+
 	
 	public StringProperty userProperty() {
 		return userField.textProperty();

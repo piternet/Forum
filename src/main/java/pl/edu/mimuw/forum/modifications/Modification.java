@@ -5,8 +5,7 @@ package pl.edu.mimuw.forum.modifications;
  */
 public abstract class Modification {
 
-
-
     public abstract void undo();
     public abstract void redo();
+
 }

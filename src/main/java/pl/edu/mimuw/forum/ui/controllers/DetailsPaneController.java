@@ -23,6 +23,10 @@ import pl.edu.mimuw.forum.ui.models.TaskViewModel;
  */
 public class DetailsPaneController implements Initializable {
 
+	public ContentPaneController getContentController() {
+		return contentController;
+	}
+
 	@FXML
 	private ContentPaneController contentController;
 	

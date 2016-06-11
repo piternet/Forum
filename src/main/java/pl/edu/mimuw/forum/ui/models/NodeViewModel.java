@@ -8,7 +8,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import pl.edu.mimuw.forum.data.Node;
+import pl.edu.mimuw.forum.modifications.ModificationOfContent;
 import pl.edu.mimuw.forum.ui.controllers.DetailsPaneController;
+import pl.edu.mimuw.forum.ui.controllers.MainPaneController;
 
 public class NodeViewModel {
 

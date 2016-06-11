@@ -18,8 +18,11 @@ public class ModificationOfNode extends Modification {
 
     public void undo() {
         NodeViewModel parent = model.getParent();
-        if(parent.getChildren().contains(model))
+        if(parent.getChildren().contains(model)) {
             parent.getChildren().remove(model);
+
+        }
+
     }
 
     public void redo() {

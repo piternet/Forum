@@ -1,7 +1,7 @@
 <Forum>
   <pl.edu.mimuw.forum.data.Comment>
-    <content>Welcomffdfde to a new forumdsfffds</content>
-    <author>wqwqewqqweqweqewsdfdsdsfdsfdsf</author>
+    <content>Welcomffdfde to a new forumdsfffdsiiiii</content>
+    <author>wqiwqewqqweqweqewsdfdsdsfdsfdsf</author>
     <pl.edu.mimuw.forum.data.Comment>
       <content>dfdsfsdf</content>
       <author>fdsfds</author>
@@ -9,6 +9,10 @@
         <content>dsada</content>
         <author>sadsaddsa</author>
       </pl.edu.mimuw.forum.data.Comment>
+    </pl.edu.mimuw.forum.data.Comment>
+    <pl.edu.mimuw.forum.data.Comment>
+      <content>u</content>
+      <author>u</author>
     </pl.edu.mimuw.forum.data.Comment>
   </pl.edu.mimuw.forum.data.Comment>
 </Forum>
